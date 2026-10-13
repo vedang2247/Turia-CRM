@@ -3,7 +3,7 @@ const config = require('./config');
 const { createDatabase } = require('./db/database');
 const { createApp } = require('./app');
 
-const db = createDatabase(config.dbPath);
+const db = createDatabase(config.dbPath, { includeCrm: true });
 const app = createApp({ db, corsOrigins: config.corsOrigins });
 
 const server = app.listen(config.port, () => {

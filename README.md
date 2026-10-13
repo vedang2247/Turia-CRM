@@ -1,16 +1,19 @@
-# Turia Agent Center (MVP)
+# Turia Agent Center CRM
 
 A local demo of an **Agent Center** with three agent modules: **Task**, **DSC** and **License**.
 You can create, edit, save as draft, publish, disable and *simulate* agents, and review what each simulated run did.
 
-> **Everything that "runs" is simulated.** No email, WhatsApp or in-app message is ever sent, and there is no scheduler.
-> A test run records what *would* happen, and the UI and API label it as simulated.
+The project includes the original simulated Agent Center plus a CRM workspace with tasks,
+clients, templates, Gmail inbox integration, and a WhatsApp inbox bridge. Agent test runs
+remain simulated; Gmail and WhatsApp actions are real only when their external credentials
+and accounts are configured.
 
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js (App Router), React, JavaScript, Tailwind CSS, Redux Toolkit |
 | Backend | Node.js, Express, REST/JSON |
 | Database | SQLite via `better-sqlite3` (a single file, created automatically) |
+| WhatsApp bridge | Node.js, Socket.IO, `whatsapp-web.js` (port 4001) |
 
 ---
 
@@ -67,6 +70,36 @@ npm run lint        # ESLint (Next.js "core-web-vitals" rules); `next build` als
 npm run build       # production build
 npm start           # serves the production build on http://localhost:3000
 ```
+
+### CRM integrations
+
+Run the WhatsApp bridge in a third terminal when WhatsApp is needed:
+
+```bash
+cd whatsapp-server
+cp .env.example .env        # Windows PowerShell: Copy-Item .env.example .env
+npm install
+npm start
+```
+
+The bridge serves Socket.IO on port `4001` and displays a QR code in its terminal
+on first login. Gmail is accessed by frontend route handlers; configure these
+variables in `frontend/.env.local`, then open **Connections** and complete Google OAuth:
+
+| Variable | Meaning |
+|---|---|
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `GOOGLE_REDIRECT_URI` | Authorized callback, normally `http://localhost:3000/api/auth/google/callback` |
+| `SESSION_SECRET` | Long random secret used to encrypt the Gmail session cookie |
+| `NEXT_PUBLIC_WHATSAPP_URL` | WhatsApp bridge URL, normally `http://localhost:4001` |
+
+Email threads can be converted into tasks or linked to existing tasks. Task emails
+are sent through Gmail first and then recorded in the backend, including an automatic
+email timeline link. If recording fails after Gmail accepts the message, the modal
+reports that state so the operator can retry. External OAuth, Gmail delivery,
+WhatsApp QR authentication, and browser-level smoke tests require real accounts and
+are not covered by the automated suite.
 Run the backend in another terminal as above. After changing `NEXT_PUBLIC_API_URL` you must run `npm run build` again, because that value is baked into the build.
 For a production-style backend run use `npm start` instead of `npm run dev`.
 

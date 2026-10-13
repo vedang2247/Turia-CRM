@@ -3,8 +3,10 @@
 export const headerNavigation = [
   { label: 'Notices', icon: '◌' },
   { label: 'Compliance', icon: '◫' },
-  { label: 'WhatsApp', icon: '◉', badge: 2 },
-  { label: 'Email', icon: '✉' },
+  { label: 'WhatsApp', icon: '◉', route: '/whatsapp', activePrefix: '/whatsapp', badge: 2 },
+  { label: 'Email', icon: '✉', route: '/email', activePrefix: '/email' },
+  { label: 'Tasks', icon: '▣', route: '/tasks', activePrefix: '/tasks' },
+  { label: 'Connections', icon: '⌘', route: '/connections', activePrefix: '/connections' },
   { label: 'Agents', icon: '♙', route: '/agent-center', activePrefix: '/agent' },
   { label: 'Chat', icon: '◍', badge: 8 },
   { label: 'Sprints', icon: '▤' },
@@ -18,7 +20,7 @@ export const sidebarNavigation = [
   { label: 'Leads', icon: '♙' },
   { label: 'Client', icon: '♧' },
   { label: 'Services', icon: '⚑' },
-  { label: 'Task', icon: '▣', route: '/agents/new?module=Task' },
+  { label: 'Task', icon: '▣', route: '/tasks' },
   { label: 'Invoice', icon: '▤' },
   { label: 'DSC', icon: '◈', route: '/agents/new?module=DSC' },
   { label: 'License', icon: '▥', route: '/agents/new?module=License' },
@@ -28,4 +30,5 @@ export const sidebarNavigation = [
   { label: 'Reports', icon: '▧' },
   { label: 'Visitors', icon: '♙' },
   { label: 'History', icon: '◷', route: '/history' },
+  { label: 'Templates', icon: '▤', route: '/templates' },
 ];

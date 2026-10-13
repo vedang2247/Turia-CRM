@@ -7,7 +7,7 @@ const Database = require('better-sqlite3');
 
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
 
-function createDatabase(dbPath) {
+function createDatabase(dbPath, { includeCrm = false } = {}) {
   if (dbPath !== ':memory:') {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   }
@@ -19,10 +19,31 @@ function createDatabase(dbPath) {
   // WAL = better concurrency and crash-safety for a file database.
   if (dbPath !== ':memory:') db.pragma('journal_mode = WAL');
 
-  // Create tables/indexes if missing (idempotent).
-  db.exec(fs.readFileSync(SCHEMA_PATH, 'utf8'));
+  const fullSchema = fs.readFileSync(SCHEMA_PATH, 'utf8');
+
+  if (includeCrm) {
+    db.exec(fullSchema);
+  } else {
+    // Legacy Agent Center schema (before CRM section)
+    const marker = '-- CRM TABLES & INDEXES';
+    const coreSchema = fullSchema.includes(marker)
+      ? fullSchema.split(marker)[0]
+      : fullSchema;
+    db.exec(coreSchema);
+  }
 
   return db;
 }
 
-module.exports = { createDatabase };
+function initCrmSchema(db) {
+  const fullSchema = fs.readFileSync(SCHEMA_PATH, 'utf8');
+  const marker = '-- CRM TABLES & INDEXES';
+  if (fullSchema.includes(marker)) {
+    const crmSql = fullSchema.substring(fullSchema.indexOf(marker));
+    db.exec(crmSql);
+  } else {
+    db.exec(fullSchema);
+  }
+}
+
+module.exports = { createDatabase, initCrmSchema, SCHEMA_PATH };
