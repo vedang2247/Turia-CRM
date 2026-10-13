@@ -27,7 +27,8 @@ anything; do not start duplicate backend instances.
 
 ## 2. Run it from a clean checkout
 
-Open **two terminals**.
+Open **three terminals**. Start the backend and WhatsApp bridge before the
+frontend.
 
 **Terminal 1: backend**
 ```bash
@@ -92,7 +93,7 @@ variables in `frontend/.env.local`, then open **Connections** and complete Googl
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `GOOGLE_REDIRECT_URI` | Authorized callback, normally `http://localhost:3000/api/auth/google/callback` |
 | `SESSION_SECRET` | Long random secret used to encrypt the Gmail session cookie |
-| `NEXT_PUBLIC_WHATSAPP_URL` | WhatsApp bridge URL, normally `http://localhost:4001` |
+| `NEXT_PUBLIC_WA_SERVER_URL` | WhatsApp bridge URL, normally `http://localhost:4001` |
 
 Email threads can be converted into tasks or linked to existing tasks. Task emails
 are sent through Gmail first and then recorded in the backend, including an automatic
@@ -123,6 +124,11 @@ The first `npm install` in `backend/` and in `frontend/` creates a `package-lock
 | Variable | Default | Meaning |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api` | Backend base URL. Changing it requires restarting `npm run dev`. |
+| `NEXT_PUBLIC_WA_SERVER_URL` | `http://localhost:4001` | WhatsApp Socket.IO bridge URL. |
+| `GOOGLE_CLIENT_ID` | — | Google OAuth client ID. |
+| `GOOGLE_CLIENT_SECRET` | — | Google OAuth client secret. |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:3000/api/auth/google/callback` | Google OAuth callback URL. |
+| `SESSION_SECRET` | — | Random secret of at least 32 characters for Gmail sessions. |
 
 No secrets are used. `NEXT_PUBLIC_*` values are visible in the browser by design, so never put secrets in them.
 
