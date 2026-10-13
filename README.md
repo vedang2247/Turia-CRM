@@ -246,42 +246,70 @@ npm test
 8. **Failure display:** with the backend stopped, click *Test run* on a published agent. An error notice appears. (A server-side `failed` simulation cannot be triggered from the UI, because the UI only saves valid configurations; the automated tests cover it.)
 9. **Missing record:** open `/agents/99999`. You get "Agent not found." and a link back, not a crash.
 
-## 7. Project structure
+## 7. Current project structure
 
 ```
-backend/
-  src/server.js                 starts Express, closes SQLite cleanly on Ctrl+C
-  src/app.js                    middleware, /api/health, route mounting
-  src/config.js                 reads .env (one place)
-  src/config/agentDefinitions.js  triggers / conditions / options (single source of truth)
-  src/db/{database.js,schema.sql} connection + automatic table creation
-  src/validators/agentValidator.js server-side validation and normalisation
-  src/services/agentService.js    agent rules + SQL
-  src/services/executionService.js simulated runs + history
-  src/controllers/, src/routes/   HTTP layer
-  src/middleware/errorHandler.js  consistent JSON errors
-  tests/                          automated tests
-frontend/src/
-  app/agent-center/page.jsx       module cards, agent list, search/filters, actions
-  app/agents/new/page.jsx         create
-  app/agents/[id]/page.jsx        details, test runs
-  app/agents/[id]/edit/page.jsx   edit a draft
-  app/history/page.jsx            execution history with details
-  components/AgentForm.jsx        shared create/edit form with validation + preview
-  components/{Shell,RunDetails}.jsx
-  services/{api.js,agentApi.js}   all HTTP calls
-  store/                          Redux Toolkit (agent list, filters, actions)
+turia-crm/
+├── backend/
+│   ├── src/
+│   │   ├── app.js, server.js, config.js       Express app, startup and configuration
+│   │   ├── config/agentDefinitions.js         Agent modules and form definitions
+│   │   ├── controllers/                       Agent and CRM request handlers
+│   │   ├── db/                                SQLite connection, schema and seed data
+│   │   ├── middleware/errorHandler.js         Consistent API error responses
+│   │   ├── routes/                             Agent, history, CRM, task and template routes
+│   │   ├── services/                           Agent, task, client, team, template and chat logic
+│   │   └── validators/                         Agent and CRM input validation
+│   └── tests/                                  API, controller, service, validator and CRM tests
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── agent-center/                    Agent dashboard
+│   │   │   ├── agents/                         Agent creation, details and draft editing
+│   │   │   ├── api/                            Gmail OAuth, profile, threads and send handlers
+│   │   │   ├── connections/                    Gmail and WhatsApp connection status
+│   │   │   ├── email/                          Gmail inbox
+│   │   │   ├── history/                         Agent execution history
+│   │   │   ├── tasks/                           CRM task list and task details
+│   │   │   ├── templates/                       Communication template management
+│   │   │   └── whatsapp/                        WhatsApp inbox
+│   │   ├── components/
+│   │   │   ├── connections/                     Connection cards and QR display
+│   │   │   ├── email/                           Email list, thread and compose components
+│   │   │   ├── tasks/                           Task creation, linking and conversion components
+│   │   │   └── whatsapp/                        Chat list, thread and message composer
+│   │   ├── lib/                                 Gmail parsing, MIME and Socket.IO helpers
+│   │   ├── services/                            Backend and CRM API clients
+│   │   └── store/                               Redux Toolkit slices and provider
+│   └── .env.example                             Frontend configuration template
+├── whatsapp-server/
+│   ├── index.js                                 Socket.IO WhatsApp bridge
+│   ├── package.json                             Bridge dependencies and scripts
+│   └── .env.example                             Bridge configuration template
+├── docs/
+│   ├── MIGRATION_PLAN.md                        Migration milestones and implementation scope
+│   └── agents.md                                Agent/project instructions
+├── README.md
+└── .gitignore
 ```
+
+### Main application flows
+
+- **Agent Center:** create, edit, publish, disable and simulate Task, DSC and License agents.
+- **CRM tasks:** create and manage tasks, clients, assignees, statuses, priorities and linked communications.
+- **Templates:** create, search, edit, preview and delete reusable communication templates.
+- **Gmail:** authenticate with Google OAuth, list threads, view messages, send email and link email activity to tasks.
+- **WhatsApp:** authenticate through the QR code, load chats and messages, send messages and convert or link messages to tasks.
+- **Task badges:** linked email and WhatsApp conversations display the associated task code.
 
 ## 8. Known limitations
 
-- **Simulation only.** No real email, WhatsApp or in-app delivery, and no background scheduler. The Email/WhatsApp/In-app choice is stored configuration only.
-- Expiry conditions are not connected to real task, DSC or license data. Test runs use fixed sample records.
-- The `actual` run type exists in the schema but is not implemented; only `test` runs are recorded.
-- Published agents are read-only and disabled agents cannot be re-enabled. To change a published agent, create a new one.
-- No delete endpoint, no authentication or multi-user support (local demo).
-- The Agent Center list loads all agents at once (no pagination); history is capped at 250 rows per request.
-- **No automated frontend tests.** The frontend was checked by static analysis and the manual list above, not by browser automation.
-- The UI follows the written assignment. It has **not** been compared against the Turia website or the reference screenshot/video, so visual details may differ from the original.
-- The Message template is plain text (no placeholders such as `{{name}}`).
-# Assignment-agent
+- Agent executions remain simulated; there is no background scheduler or real Task/DSC/License event processor.
+- Gmail and WhatsApp require external account access and valid local credentials. They are not available from a clean checkout until configured.
+- Gmail OAuth credentials and `SESSION_SECRET` must remain in an untracked local environment file.
+- WhatsApp uses `whatsapp-web.js` and a persisted local browser session. The QR code must be scanned on first authentication.
+- The WhatsApp bridge includes compatibility extraction for WhatsApp Web changes; updates to WhatsApp Web may still require library changes.
+- There is no authentication or multi-user authorization for the local application.
+- Published agents are read-only and disabled agents cannot be re-enabled.
+- The frontend has lint/build validation, but no automated browser test suite.
+- Agent Center history is capped at 250 rows per request; the CRM task list uses server-side pagination.
